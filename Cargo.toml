@@ -1,7 +1,11 @@
 [package]
 name = "rusty_vainfo"
 version = "0.1.0"
+author = "Valerian G. <valerian@dusklabs.io>"
 edition = "2018"
+description = "libva-utils' vainfo implemented in rust"
+license = "MIT"
+repository = "https://github.com/vgarleanu/rusty_vainfo"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
