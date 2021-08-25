@@ -1,6 +1,6 @@
 [package]
 name = "rusty_vainfo"
-version = "0.1.2"
+version = "0.1.3"
 author = "Valerian G. <valerian@dusklabs.io>"
 edition = "2018"
 description = "libva-utils' vainfo implemented in rust"
