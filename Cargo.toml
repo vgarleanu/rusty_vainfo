@@ -10,4 +10,4 @@ repository = "https://github.com/vgarleanu/rusty_vainfo"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-libva-sys = "0.1.2"
+libva-sys = { git = "https://github.com/vgarleanu/libva-sys" }
