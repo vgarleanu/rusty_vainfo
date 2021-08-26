@@ -1,30 +1,6 @@
 use libva_sys::*;
 use std::ffi::CStr;
-use std::os::unix::io::IntoRawFd;
 use std::collections::HashMap;
-use std::fs::OpenOptions;
-
-const DEVICE_PATHS: &[&str] = &[
-    "/dev/dri/renderD128",
-    "/dev/dri/card0",
-];
-
-pub fn open_display() -> Option<VADisplay> {
-    for device in DEVICE_PATHS {
-        if let Ok(x) = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .open(device) {
-                let va_dpy = unsafe { va_drm::vaGetDisplayDRM(x.into_raw_fd()) };
-
-                if !va_dpy.is_null() {
-                    return Some(va_dpy);
-                }
-        }
-    }
-
-    None
-}
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Profile {
@@ -39,7 +15,11 @@ pub struct VaInstance {
 
 impl VaInstance {
     pub fn new() -> Result<Self, ()> {
-        let va_display = open_display().ok_or(())?;
+        let va_display = unsafe { va_open_display() };
+
+        if va_display.is_null() {
+            return Err(());
+        }
 
         let mut major = 0;
         let mut minor = 0;
