@@ -1,6 +1,11 @@
 use libva_sys::*;
+
 use std::ffi::CStr;
 use std::collections::HashMap;
+use std::path::Path;
+use std::fs::OpenOptions;
+use std::os::unix::io::IntoRawFd;
+use std::os::unix::io::AsRawFd;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Profile {
@@ -28,6 +33,38 @@ impl VaInstance {
         if va_status != VA_STATUS_SUCCESS as i32 {
             return Err(());
         }
+
+        Ok(Self {
+            va_display,
+            version: (major, minor),
+        })
+    }
+
+    pub fn with_drm(drm: impl AsRef<Path>) -> Result<Self, ()> {
+        let drm_file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(drm.as_ref())
+            .map_err(|_| ())?;
+
+        let va_display = unsafe {
+            va_display_drm::vaGetDisplayDRM(drm_file.as_raw_fd())
+        };
+
+        if va_display.is_null() {
+            return Err(())
+        }
+
+        let mut major = 0;
+        let mut minor = 0;
+        let va_status = unsafe { vaInitialize(va_display, &mut major, &mut minor) };
+
+        if va_status != VA_STATUS_SUCCESS as i32 {
+            return Err(());
+        }
+
+        // NOTE: Its important to consume `drm_file` here and leak it so that libva doesnt crash.
+        let _ = drm_file.into_raw_fd();
 
         Ok(Self {
             va_display,
